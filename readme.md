@@ -52,23 +52,14 @@ python main.py --model qwen3:32b
 
 
 ## How it works
+![Architecture](https://github-production-user-asset-6210df.s3.amazonaws.com/209818798/440162845-5d8e3b21-2095-41f6-b1db-e0c6c047958f.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250504%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250504T053828Z&X-Amz-Expires=300&X-Amz-Signature=7a44b959a613474452f0e24e21d884f080f7e78438a8e5c39aa2c8ff054c7ca7&X-Amz-SignedHeaders=host)
 
-```
-┌─────────────┐    messages    ┌───────────────┐
-│ Your shell  │──────────────▶│   Ollama LLM   │
-└─────┬───────┘                └───────────────┘
-      │ tools (JSON‑RPC)               │
-┌─────▼────────┐               ┌──────▼────────┐
-│  OllamaAgent │——executes──▶  │  System tools │
-└──────────────┘               └───────────────┘
-```
+1. Natural language input from the terminal is sent to the model, along with a system prompt that lists the available tools.
+2. The local LLM (via Ollama) analyzes the request and responds with either a plain-text answer or a structured tool call.
+3. If a tool call is issued, the OllamaAgent executes the corresponding function (e.g., read/write a file, run a shell command) and sends the result back to the model.
+4. This loop continues until the model produces a final answer, which is then printed in your terminal.
 
-1. **Natural‑language input** is sent to the model together with a *system prompt* that lists available tools.
-2. The model replies with either plain text or a structured *tool call*.
-3. `OllamaAgent` executes the requested tool (read/write file, run command, …) and feeds the result back to the model so it can continue reasoning.
-4. The final answer is printed in your terminal.
-
-All logic lives in [`main.py`](./main.py); the heavy lifting is done by the open‑source model running locally. 
+All logic is in [`main.py`](./main.py); the heavy lifting is done by the open‑source model running locally. 
 
 
 ## Available tools
@@ -90,12 +81,11 @@ Add your own by editing `get_tools_definition()`—the model will “see” them
 Local Cursor keeps its runtime lean:
 
 ```text
-requests       # HTTP for Exa API
-click          # Ergonomic CLI interface
-colorama       # ANSI colours for cross‑platform terminals
-openai         # Thin client used to call the Ollama API
-python‑dotenv  # Convenience loader for .env files
-pytest         # Unit testing helpers
+requests       # To make EXA API calls
+click          # To write CLI
+colorama       # To format CLI output
+openai         # To create an OpenAI client
+python‑dotenv  # To load environment variables from our .env file
 ```
 
 (See [`requirements.txt`](./requirements.txt) for exact versions.) 
@@ -116,21 +106,11 @@ pytest         # Unit testing helpers
 | High memory usage                            | Try a smaller Ollama model like `phi3:4b`                  |
 
 
-## Roadmap
-
-* Tool calling (v0.1)
-* Persistent chat history
-* Web UI (FastAPI + React)
-* Plugin system for custom workflows
-
-Feel free to open issues or PRs with ideas!
-
 ## Contributing
 
 1. Fork & clone
 2. Create a virtualenv and install dev dependencies (`pip install -r requirements-dev.txt`)
-3. Run `pytest` – tests must pass
-4. Follow the [Conventional Commits](https://www.conventionalcommits.org/) spec for commit messages
+3. Create a PR 
 
 
 ### Acknowledgements
